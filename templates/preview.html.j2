@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>{{ font_name }} — Preview</title>
+<style>
+/* minimal inline styles for preview */
+body{font-family: system-ui, sans-serif; padding:20px}
+.preview{font-family: '{{ font_name }}', sans-serif;}
+</style>
+<style>
+@font-face{font-family: '{{ font_name }}'; src: url('{{ font_data_uri }}');}
+</style>
+</head>
+<body>
+<h1>{{ font_name }}</h1>
+<div>UnitsPerEm: {{ metrics.unitsPerEm }} | Ascender: {{ metrics.ascender }} | Descender: {{ metrics.descender }} | Glyphs: {{ metrics.glyphCount }}</div>
+<hr/>
+<div>
+<label>Sample text:</label>
+<input id="sample" value="{{ samples.english }}" style="width:100%"/>
+
+<div class="preview" id="preview-area" style="font-size:24px; margin-top:10px">{{ samples.english }}</div>
+</div>
+<script>
+const input = document.getElementById('sample');
+const preview = document.getElementById('preview-area');
+input.addEventListener('input', (e)=> preview.textContent = e.target.value);
+</script>
+</body>
+</html>

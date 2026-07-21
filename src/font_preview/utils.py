@@ -1,6 +1,6 @@
 import base64
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def embed_font_base64(font_path: str) -> str:
@@ -28,5 +28,5 @@ def timestamped_output_name(font_path: str) -> str:
     Uses UTC time in format YYYYMMDDTHHMMSSZ.
     """
     p = Path(font_path).name
-    stamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     return f"{p}.{stamp}.html"

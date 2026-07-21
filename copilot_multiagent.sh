@@ -543,7 +543,7 @@ main() {
       # 先做额度预检
       echo "检查额度状态..."
       local check_output
-      check_output=$(eval "${env_cmd} timeout 15 copilot -p 'say ok and nothing else' --silent 2>&1" || true)
+      check_output=$(eval "${env_cmd} COPILOT_ALLOW_ALL=1 copilot -p 'ok' -s 2>&1" || true)
       if echo "$check_output" | grep -qiE "(exceeded.*(quota|limit)|rate limit|quota exhausted|insufficient_quota)"; then
         echo ""
         header "═══════════════════════════════════════════════"

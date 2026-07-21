@@ -12,7 +12,7 @@ def test_embed_font_base64(tmp_path):
     f.write_bytes(b'abc')
     uri = utils.embed_font_base64(str(f))
     assert uri.startswith('data:font')
-    assert 'YWJj' in uri  # base64 for 'abc'
+    assert 'YWJj' in uri
 
 
 def test_embed_font_base64_otf(tmp_path):
@@ -28,41 +28,53 @@ def test_timestamped_output_name(tmp_path):
     """Test that timestamped_output_name generates proper filenames."""
     f = tmp_path / 'myfont.ttf'
     out = utils.timestamped_output_name(str(f))
-    # Should include original filename and end with .html
     assert 'myfont.ttf' in out
     assert out.endswith('.html')
-    # Should have timestamp pattern
     assert 'T' in out and 'Z' in out
 
 
 def test_parse_font(fake_fonttools):
-    """Test that parse_font extracts metadata and metrics correctly."""
-    # fake_fonttools fixture injects mocked fonttools
+    """Test that parse_font extracts metadata, metrics, and info correctly."""
     if 'font_preview.generator' in sys.modules:
         del sys.modules['font_preview.generator']
     generator = importlib.import_module('font_preview.generator')
 
     result = generator.parse_font('/fake/path/font.ttf')
 
-    # Verify the structure
     assert isinstance(result, dict)
     assert 'name' in result
     assert 'metrics' in result
-    
-    # Verify name extraction
+    assert 'info' in result
+    assert 'chars' in result
+
+    # Name
     assert result['name'] == 'TestFont'
-    
-    # Verify metrics extraction
+
+    # Metrics
     metrics = result['metrics']
     assert metrics['unitsPerEm'] == 1000
     assert metrics['ascender'] == 800
     assert metrics['descender'] == -200
-    assert metrics['glyphCount'] == 4  # ['.notdef', 'a', 'b', 'c']
+    assert metrics['glyphCount'] == 4
+
+    # Info metadata
+    info = result['info']
+    assert info['familyName'] == 'TestFont'
+    assert info['style'] == 'Regular'
+    assert info['version'] == 'Version 1.000'
+    assert info['designer'] == 'Test Designer'
+    assert 'Copyright' in info['copyright']
+    assert info['license'] == 'SIL Open Font License'
+    assert info['trademark'] == 'TestFont is a trademark'
+
+    # Characters
+    assert len(result['chars']) > 0
+    assert any(c['codepoint'] == 'U+0041' for c in result['chars'])
+    assert any(c['codepoint'] == 'U+4E2D' for c in result['chars'])
 
 
 def test_generate_preview_writes_html(fake_fonttools, tmp_path):
     """Test that generate_preview creates a valid HTML file."""
-    # fake_fonttools fixture injects mocked fonttools
     if 'font_preview.generator' in sys.modules:
         del sys.modules['font_preview.generator']
     generator = importlib.import_module('font_preview.generator')
@@ -79,8 +91,8 @@ def test_generate_preview_writes_html(fake_fonttools, tmp_path):
     assert 'metrics' in content.lower()
 
 
-def test_generate_preview_includes_sample_text(fake_fonttools, tmp_path):
-    """Test that generated HTML includes sample text in multiple languages."""
+def test_generate_preview_includes_all_sections(fake_fonttools, tmp_path):
+    """Test that generated HTML includes all required sections."""
     if 'font_preview.generator' in sys.modules:
         del sys.modules['font_preview.generator']
     generator = importlib.import_module('font_preview.generator')
@@ -91,10 +103,18 @@ def test_generate_preview_includes_sample_text(fake_fonttools, tmp_path):
     generator.generate_preview(str(f), str(out))
 
     content = Path(out).read_text(encoding='utf8')
-    # Should include English sample
+    # Sample text
     assert 'quick brown fox' in content.lower()
-    # Should include Chinese sample
     assert '快速' in content or 'chinese' in content.lower()
+    # Font info
+    assert 'TestFont' in content
+    assert '设计师' in content or 'designer' in content.lower()
+    # Character set
+    assert 'U+0041' in content
+    # Font size slider
+    assert 'font-size-slider' in content
+    # Theme toggle
+    assert 'theme-toggle' in content or 'toggleTheme' in content
 
 
 def test_generate_preview_returns_output_path(fake_fonttools, tmp_path):
@@ -111,3 +131,19 @@ def test_generate_preview_returns_output_path(fake_fonttools, tmp_path):
     assert isinstance(result, str)
     assert result == str(out)
     assert Path(result).exists()
+
+
+def test_chars_by_block_grouping(fake_fonttools):
+    """Test that characters are grouped by Unicode blocks."""
+    if 'font_preview.generator' in sys.modules:
+        del sys.modules['font_preview.generator']
+    generator = importlib.import_module('font_preview.generator')
+
+    result = generator.parse_font('/fake/path/font.ttf')
+    chars_by_block = generator._get_chars_by_block(result['chars'])
+
+    assert len(chars_by_block) > 0
+    # Should have Basic Latin and CJK blocks
+    block_names = [b['name'] for b in chars_by_block]
+    assert 'Basic Latin' in block_names
+    assert 'CJK Unified Ideographs' in block_names

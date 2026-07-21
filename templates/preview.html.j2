@@ -7,49 +7,108 @@
 <style>
 @font-face { font-family: '{{ font_name }}'; src: url('{{ font_data_uri }}'); }
 
-* {
-  box-sizing: border-box;
+:root {
+  --bg: #fff;
+  --text: #333;
+  --card: #f5f5f5;
+  --border: #ddd;
+  --input-bg: #fff;
+  --input-border: #ccc;
+  --preview-bg: #fafafa;
+  --accent: #333;
+  --muted: #666;
+  --chip-border: #ccc;
+  --chip-bg: #fff;
+  --chip-hover: #f0f0f0;
 }
+
+body.dark {
+  --bg: #1a1a2e;
+  --text: #e0e0e0;
+  --card: #16213e;
+  --border: #2a2a4a;
+  --input-bg: #16213e;
+  --input-border: #3a3a5a;
+  --preview-bg: #0f3460;
+  --accent: #e94560;
+  --muted: #aaa;
+  --chip-border: #3a3a5a;
+  --chip-bg: #16213e;
+  --chip-hover: #0f3460;
+}
+
+* { box-sizing: border-box; }
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
   padding: 20px;
   margin: 0;
-  background-color: #fff;
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
   line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
 }
 
 @media (max-width: 768px) {
-  body {
-    padding: 15px;
-  }
+  body { padding: 15px; }
 }
 
-h1 {
-  margin: 0 0 20px 0;
-  font-size: 2.5em;
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.toolbar h1 {
+  margin: 0;
+  font-size: 2em;
   font-family: '{{ font_name }}', system-ui, sans-serif;
 }
 
 @media (max-width: 768px) {
-  h1 {
-    font-size: 1.8em;
-  }
+  .toolbar h1 { font-size: 1.5em; }
 }
 
-.metrics {
-  background: #f5f5f5;
-  padding: 15px;
+.theme-toggle {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
   border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  opacity: 0.8;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
   margin-bottom: 20px;
-  font-size: 0.95em;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 12px;
 }
 
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  gap: 12px;
 }
 
 .metric-item {
@@ -59,59 +118,105 @@ h1 {
 
 .metric-label {
   font-weight: 600;
-  color: #666;
+  color: var(--muted);
   font-size: 0.85em;
   margin-bottom: 4px;
 }
 
 .metric-value {
   font-size: 1.1em;
-  color: #222;
+  color: var(--text);
   font-family: monospace;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.8em;
+  margin-bottom: 2px;
+}
+
+.info-value {
+  font-size: 0.95em;
+  word-break: break-word;
 }
 
 hr {
   border: none;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border);
   margin: 20px 0;
 }
 
-.preview-section {
-  margin-bottom: 20px;
+.controls {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+  align-items: center;
 }
 
-label {
-  display: block;
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-group label {
   font-weight: 600;
-  margin-bottom: 8px;
-  color: #333;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.font-size-slider {
+  width: 200px;
+}
+
+.font-size-value {
+  font-family: monospace;
+  font-size: 0.9em;
+  min-width: 40px;
 }
 
 #sample {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   font-family: system-ui, sans-serif;
   font-size: 1em;
   margin-bottom: 15px;
+  background: var(--input-bg);
+  color: var(--text);
+  transition: background 0.3s, border-color 0.3s;
 }
 
 #sample:focus {
   outline: none;
-  border-color: #333;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.15);
 }
 
 .preview {
   font-family: '{{ font_name }}', system-ui, sans-serif;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   padding: 20px;
   border-radius: 4px;
-  background: #fafafa;
-  min-height: 100px;
+  background: var(--preview-bg);
+  min-height: 80px;
   display: flex;
   align-items: center;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 #preview-area {
@@ -121,25 +226,25 @@ label {
 }
 
 @media (max-width: 768px) {
-  #preview-area {
-    font-size: 1.5em;
-  }
+  #preview-area { font-size: 1.5em; }
 }
 
 .sample-toggle {
   margin-bottom: 15px;
   padding: 10px;
-  background: #f9f9f9;
+  background: var(--card);
   border-radius: 4px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  transition: background 0.3s;
 }
 
 .sample-btn {
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  background: #fff;
+  padding: 6px 14px;
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--text);
   border-radius: 3px;
   cursor: pointer;
   font-size: 0.9em;
@@ -147,80 +252,273 @@ label {
 }
 
 .sample-btn:hover {
-  background: #f0f0f0;
+  background: var(--chip-hover);
 }
 
 .sample-btn.active {
-  background: #333;
+  background: var(--accent);
   color: #fff;
-  border-color: #333;
+  border-color: var(--accent);
 }
+
+/* Character set section */
+.charset-section {
+  margin-top: 20px;
+}
+
+.charset-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.charset-nav-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--text);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.2s;
+}
+
+.charset-nav-btn:hover {
+  background: var(--chip-hover);
+}
+
+.charset-nav-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.charset-block {
+  margin-bottom: 20px;
+}
+
+.charset-block-title {
+  font-weight: 600;
+  font-size: 0.9em;
+  color: var(--muted);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.charset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 4px;
+}
+
+.charset-cell {
+  text-align: center;
+  padding: 4px 2px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: '{{ font_name }}', system-ui, sans-serif;
+  font-size: 1.1em;
+  cursor: default;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.charset-cell:hover {
+  background: var(--chip-hover);
+}
+
+.charset-cell .char-codepoint {
+  display: none;
+  font-size: 0.55em;
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.charset-cell:hover .char-codepoint {
+  display: block;
+}
+
+.hidden { display: none; }
 </style>
 </head>
 <body>
-<h1>{{ font_name }}</h1>
+<div class="toolbar">
+  <h1>{{ font_name }}</h1>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 深色模式</button>
+</div>
 
-<div class="metrics">
+<!-- Font Info -->
+{% if info.copyright or info.designer or info.version or info.license or info.style %}
+<div class="card">
+  <div class="card-title">字体信息</div>
+  <div class="info-grid">
+    {% if info.copyright %}<div class="info-item"><span class="info-label">版权</span><span class="info-value">{{ info.copyright }}</span></div>{% endif %}
+    {% if info.designer %}<div class="info-item"><span class="info-label">设计师</span><span class="info-value">{{ info.designer }}</span></div>{% endif %}
+    {% if info.style %}<div class="info-item"><span class="info-label">样式</span><span class="info-value">{{ info.style }}</span></div>{% endif %}
+    {% if info.version %}<div class="info-item"><span class="info-label">版本</span><span class="info-value">{{ info.version }}</span></div>{% endif %}
+    {% if info.license %}<div class="info-item"><span class="info-label">许可</span><span class="info-value">{{ info.license }}</span></div>{% endif %}
+    {% if info.trademark %}<div class="info-item"><span class="info-label">商标</span><span class="info-value">{{ info.trademark }}</span></div>{% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Metrics -->
+<div class="card">
+  <div class="card-title">字体规格</div>
   <div class="metrics-grid">
     <div class="metric-item">
       <div class="metric-label">Units Per Em</div>
-      <div class="metric-value">{{ metrics.unitsPerEm }}</div>
+      <div class="metric-value">{{ metrics.unitsPerEm or 'N/A' }}</div>
     </div>
     <div class="metric-item">
       <div class="metric-label">Ascender</div>
-      <div class="metric-value">{{ metrics.ascender }}</div>
+      <div class="metric-value">{{ metrics.ascender or 'N/A' }}</div>
     </div>
     <div class="metric-item">
       <div class="metric-label">Descender</div>
-      <div class="metric-value">{{ metrics.descender }}</div>
+      <div class="metric-value">{{ metrics.descender or 'N/A' }}</div>
     </div>
     <div class="metric-item">
       <div class="metric-label">Glyph Count</div>
-      <div class="metric-value">{{ metrics.glyphCount }}</div>
+      <div class="metric-value">{{ metrics.glyphCount or 'N/A' }}</div>
     </div>
   </div>
 </div>
 
 <hr/>
 
+<!-- Preview Section -->
 <div class="preview-section">
-  <label>Sample Text:</label>
+  <div class="controls">
+    <div class="control-group">
+      <label for="fontSize">字号:</label>
+      <input type="range" id="fontSize" class="font-size-slider" min="12" max="72" value="32" oninput="updateFontSize(this.value)">
+      <span class="font-size-value" id="fontSizeLabel">32px</span>
+    </div>
+  </div>
+
+  <label>示例文本:</label>
   <div class="sample-toggle">
-    <button class="sample-btn active" data-sample="english">English Pangram</button>
-    <button class="sample-btn" data-sample="chinese">Chinese Text</button>
+    <button class="sample-btn active" data-sample="english">English</button>
+    <button class="sample-btn" data-sample="chinese">中文</button>
   </div>
   <input id="sample" value="{{ samples.english }}" />
   <div class="preview" id="preview-area">{{ samples.english }}</div>
 </div>
 
+<hr/>
+
+<!-- Character Set -->
+<div class="charset-section">
+  <div class="card-title">字符集 <span style="font-weight:400;font-size:0.8em;color:var(--muted)">(按 Unicode 区块分组，悬停查看编码)</span></div>
+  <div class="charset-nav" id="charsetNav"></div>
+  <div id="charsetBlocks"></div>
+</div>
+
 <script>
 (function() {
-  const input = document.getElementById('sample');
-  const preview = document.getElementById('preview-area');
-  const sampleBtns = document.querySelectorAll('.sample-btn');
-  
-  // Sample templates
-  const sampleTexts = {
-    english: '{{ samples.english }}',
-    chinese: '{{ samples.chinese }}'
+  // --- Dark Mode ---
+  window.toggleTheme = function() {
+    const body = document.body;
+    const btn = document.getElementById('themeToggle');
+    body.classList.toggle('dark');
+    const isDark = body.classList.contains('dark');
+    btn.textContent = isDark ? '☀️ 浅色模式' : '🌙 深色模式';
+    localStorage.setItem('fontPreviewTheme', isDark ? 'dark' : 'light');
   };
-  
-  // Handle sample button clicks
-  sampleBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const sampleKey = e.target.dataset.sample;
-      input.value = sampleTexts[sampleKey];
-      preview.textContent = sampleTexts[sampleKey];
-      
-      // Update active button
-      sampleBtns.forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
+
+  // Restore theme
+  const savedTheme = localStorage.getItem('fontPreviewTheme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeToggle').textContent = '☀️ 浅色模式';
+  }
+
+  // --- Font Size Slider ---
+  window.updateFontSize = function(val) {
+    document.getElementById('preview-area').style.fontSize = val + 'px';
+    document.getElementById('fontSizeLabel').textContent = val + 'px';
+  };
+
+  // --- Sample Switcher ---
+  const sampleTexts = {
+    english: {{ samples.english | tojson }},
+    chinese: {{ samples.chinese | tojson }}
+  };
+  const input = document.getElementById('sample');
+  const previewArea = document.getElementById('preview-area');
+
+  document.querySelectorAll('.sample-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const key = this.dataset.sample;
+      input.value = sampleTexts[key];
+      previewArea.textContent = sampleTexts[key];
+      document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
     });
   });
-  
-  // Handle live text input
-  input.addEventListener('input', (e) => {
-    preview.textContent = e.target.value;
+
+  input.addEventListener('input', function() {
+    previewArea.textContent = this.value;
+  });
+
+  // --- Character Set Display ---
+  const charsByBlock = {{ chars_by_block | tojson }};
+  const nav = document.getElementById('charsetNav');
+  const container = document.getElementById('charsetBlocks');
+
+  function renderBlock(blockData) {
+    const blockDiv = document.createElement('div');
+    blockDiv.className = 'charset-block';
+    blockDiv.dataset.blockName = blockData.name;
+
+    const title = document.createElement('div');
+    title.className = 'charset-block-title';
+    title.textContent = blockData.name + ' (' + blockData.chars.length + ')';
+    blockDiv.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'charset-grid';
+    blockData.chars.forEach(function(c) {
+      const cell = document.createElement('div');
+      cell.className = 'charset-cell';
+      if (c.char) {
+        const charSpan = document.createElement('div');
+        charSpan.textContent = c.char;
+        cell.appendChild(charSpan);
+      }
+      const cp = document.createElement('div');
+      cp.className = 'char-codepoint';
+      cp.textContent = c.codepoint;
+      cell.appendChild(cp);
+      grid.appendChild(cell);
+    });
+    blockDiv.appendChild(grid);
+    return blockDiv;
+  }
+
+  // Render all blocks
+  charsByBlock.forEach(function(block, idx) {
+    const blockEl = renderBlock(block);
+    if (idx > 0) blockEl.classList.add('hidden');
+    container.appendChild(blockEl);
+  });
+
+  // Render navigation buttons
+  charsByBlock.forEach(function(block, idx) {
+    const btn = document.createElement('button');
+    btn.className = 'charset-nav-btn' + (idx === 0 ? ' active' : '');
+    btn.textContent = block.name;
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.charset-nav-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.charset-block').forEach((el, i) => {
+        el.classList.toggle('hidden', i !== idx);
+      });
+    });
+    nav.appendChild(btn);
   });
 })();
 </script>

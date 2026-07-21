@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+src/font_preview/__init__.py
+src/font_preview/cli.py
+src/font_preview/generator.py
+src/font_preview/template.py
+src/font_preview/utils.py
+src/font_preview.egg-info/PKG-INFO
+src/font_preview.egg-info/SOURCES.txt
+src/font_preview.egg-info/dependency_links.txt
+src/font_preview.egg-info/entry_points.txt
+src/font_preview.egg-info/requires.txt
+src/font_preview.egg-info/top_level.txt
+tests/test_cli.py
+tests/test_generator.py

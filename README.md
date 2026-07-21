@@ -4,13 +4,15 @@ CLI tool to generate single-file HTML font previews with embedded fonts and resp
 
 ## What is font-preview?
 
-**font-preview** is a command-line tool that takes any TTF or OTF font file and generates a beautiful, responsive HTML preview in a single self-contained file. The preview includes:
-- Embedded font data (base64 encoded)
-- Sample text in multiple scripts and sizes
-- Responsive design that works on all devices
-- Complete font information and metrics
+**font-preview** is a command-line tool that takes any TTF or OTF font file and generates a beautiful, responsive HTML preview in a single self-contained file. Perfect for quickly previewing, sharing, and testing fonts without needing a complex setup.
 
-Perfect for quickly previewing, sharing, and testing fonts without needing a complex setup.
+## Features
+
+- **Single-file HTML output** - Everything embedded in one portable file
+- **Embedded fonts via base64** - No external dependencies needed; works completely offline
+- **Interactive text preview** - Sample text in multiple sizes and styles
+- **Responsive design** - Works seamlessly on desktop, tablet, and mobile
+- **CJK and Latin support** - Display character sets including Chinese, Japanese, Korean, and Latin alphabets
 
 ## Installation
 
@@ -40,7 +42,7 @@ If no output path is specified, it defaults to `font.ttf.html`:
 font-preview path/to/font.ttf
 ```
 
-For more details, see [docs/USAGE.md](docs/USAGE.md).
+For detailed usage instructions, examples, and troubleshooting, see [docs/USAGE.md](docs/USAGE.md).
 
 ---
 

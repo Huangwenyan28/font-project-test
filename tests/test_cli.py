@@ -30,6 +30,20 @@ def test_invokes_generate_preview(monkeypatch, tmp_path):
     assert 'args' in called
 
 
+def test_output_path_default(monkeypatch, tmp_path):
+    """Test that default output path uses .html extension if no -o provided."""
+    called = {}
+    def fake_generate(font_path, output_path):
+        called['output_path'] = output_path
+    monkeypatch.setattr('font_preview.generator.generate_preview', fake_generate)
+    runner = CliRunner()
+    font_file = str(tmp_path / 'dummy.ttf')
+    (tmp_path / 'dummy.ttf').write_bytes(b'')
+    result = runner.invoke(cli.main, [font_file])
+    assert result.exit_code == 0
+    assert called['output_path'] == f"{font_file}.html"
+
+
 class FakeTTFont:
     """A minimal fake TTFont-like object for integration testing."""
 

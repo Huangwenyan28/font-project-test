@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: font-preview
+Version: 0.1.0
+Summary: CLI to generate single-file HTML font previews
+Requires-Python: >=3.12
+Requires-Dist: click>=8.1
+Requires-Dist: fonttools>=4.40
+Requires-Dist: jinja2>=3.1

@@ -4,10 +4,11 @@ version = "0.1.0"
 description = "CLI to generate single-file HTML font previews"
 requires-python = ">=3.12"
 
-[project.dependencies]
-click = "^8.1"
-fonttools = "^4.40"
-jinja2 = "^3.1"
+dependencies = [
+    "click>=8.1",
+    "fonttools>=4.40",
+    "jinja2>=3.1"
+]
 
 [build-system]
 requires = ["setuptools>=61.0","wheel"]

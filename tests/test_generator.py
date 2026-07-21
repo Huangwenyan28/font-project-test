@@ -49,8 +49,45 @@ class FakeTTFont:
     def __getitem__(self, key):
         return self._tables[key]
 
+    def __contains__(self, key):
+        return key in self._tables
+
     def getGlyphOrder(self):
         return ['.notdef', 'a', 'b']
+
+
+def test_parse_font(monkeypatch):
+    """Test that parse_font extracts metadata and metrics correctly."""
+    # Create a fake fonttools.ttLib module and inject into sys.modules
+    ft = types.ModuleType('fonttools')
+    ttlib = types.ModuleType('fonttools.ttLib')
+    ttlib.TTFont = FakeTTFont
+    ft.ttLib = ttlib
+
+    monkeypatch.setitem(sys.modules, 'fonttools', ft)
+    monkeypatch.setitem(sys.modules, 'fonttools.ttLib', ttlib)
+
+    # Ensure generator is imported after our fake fonttools is in place
+    if 'font_preview.generator' in sys.modules:
+        del sys.modules['font_preview.generator']
+    generator = importlib.import_module('font_preview.generator')
+
+    result = generator.parse_font('/fake/path/font.ttf')
+
+    # Verify the structure
+    assert isinstance(result, dict)
+    assert 'name' in result
+    assert 'metrics' in result
+    
+    # Verify name extraction
+    assert result['name'] == 'FakeFont'
+    
+    # Verify metrics extraction
+    metrics = result['metrics']
+    assert metrics['unitsPerEm'] == 1000
+    assert metrics['ascender'] == 800
+    assert metrics['descender'] == -200
+    assert metrics['glyphCount'] == 3
 
 
 def test_generate_preview_writes_html(monkeypatch, tmp_path):

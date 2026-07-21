@@ -530,19 +530,35 @@ main() {
       "cmd_${cmd}" "$@"
       exit 0
       ;;
+    run)
+      init_config
+      env_cmd=$(build_env)
+      model_flag=""
+      local cm=$(read_json defaultModel)
+      [ "$cm" != "null" ] && [ -n "$cm" ] && model_flag="--model $cm"
+      shift
+      local prompt="$*"
+      if [ -z "$prompt" ]; then
+        echo "启动 Copilot（带模型/账号配置 + 额度监控）..."
+        handle_quota 0 eval "${env_cmd} copilot ${model_flag}" || true
+      else
+        handle_quota 0 eval "${env_cmd} copilot -p "$prompt" ${model_flag}" || true
+      fi
+      ;;
     help|--help|-h)
       header "\n用法:"
       echo "  ./copilot_multiagent.sh <功能名> [PRD路径] [--auto]"
       echo "  ./copilot_multiagent.sh config show|set      管理配置"
       echo "  ./copilot_multiagent.sh profile list|add|use  管理账号"
+      echo "  ./copilot_multiagent.sh run [prompt]          启动 copilot（带额度监控）"
       echo ""
       echo "示例:"
       echo "  ./copilot_multiagent.sh user-notifications          # 工作流"
       echo "  ./copilot_multiagent.sh config set model gpt-5.4    # 切模型"
       echo "  ./copilot_multiagent.sh profile add work            # 加账号"
       echo "  ./copilot_multiagent.sh profile use work            # 切账号"
-      exit 0
-      ;;
+      echo "  ./copilot_multiagent.sh run                        # 启动 copilot（推荐）"
+      exit 0      ;;
   esac
 
   local FEATURE="${1:?用法: ./copilot_multiagent.sh <功能名> [PRD路径] [--auto]}"

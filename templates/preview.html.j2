@@ -2,30 +2,227 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{{ font_name }} — Preview</title>
 <style>
-/* minimal inline styles for preview */
-body{font-family: system-ui, sans-serif; padding:20px}
-.preview{font-family: '{{ font_name }}', sans-serif;}
-</style>
-<style>
-@font-face{font-family: '{{ font_name }}'; src: url('{{ font_data_uri }}');}
+@font-face { font-family: '{{ font_name }}'; src: url('{{ font_data_uri }}'); }
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 20px;
+  margin: 0;
+  background-color: #fff;
+  color: #333;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 15px;
+  }
+}
+
+h1 {
+  margin: 0 0 20px 0;
+  font-size: 2.5em;
+  font-family: '{{ font_name }}', system-ui, sans-serif;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8em;
+  }
+}
+
+.metrics {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 0.95em;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.85em;
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 1.1em;
+  color: #222;
+  font-family: monospace;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+.preview-section {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+#sample {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: system-ui, sans-serif;
+  font-size: 1em;
+  margin-bottom: 15px;
+}
+
+#sample:focus {
+  outline: none;
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.preview {
+  font-family: '{{ font_name }}', system-ui, sans-serif;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 4px;
+  background: #fafafa;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+}
+
+#preview-area {
+  font-size: 2em;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  #preview-area {
+    font-size: 1.5em;
+  }
+}
+
+.sample-toggle {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sample-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.sample-btn:hover {
+  background: #f0f0f0;
+}
+
+.sample-btn.active {
+  background: #333;
+  color: #fff;
+  border-color: #333;
+}
 </style>
 </head>
 <body>
 <h1>{{ font_name }}</h1>
-<div>UnitsPerEm: {{ metrics.unitsPerEm }} | Ascender: {{ metrics.ascender }} | Descender: {{ metrics.descender }} | Glyphs: {{ metrics.glyphCount }}</div>
-<hr/>
-<div>
-<label>Sample text:</label>
-<input id="sample" value="{{ samples.english }}" style="width:100%"/>
 
-<div class="preview" id="preview-area" style="font-size:24px; margin-top:10px">{{ samples.english }}</div>
+<div class="metrics">
+  <div class="metrics-grid">
+    <div class="metric-item">
+      <div class="metric-label">Units Per Em</div>
+      <div class="metric-value">{{ metrics.unitsPerEm }}</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Ascender</div>
+      <div class="metric-value">{{ metrics.ascender }}</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Descender</div>
+      <div class="metric-value">{{ metrics.descender }}</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Glyph Count</div>
+      <div class="metric-value">{{ metrics.glyphCount }}</div>
+    </div>
+  </div>
 </div>
+
+<hr/>
+
+<div class="preview-section">
+  <label>Sample Text:</label>
+  <div class="sample-toggle">
+    <button class="sample-btn active" data-sample="english">English Pangram</button>
+    <button class="sample-btn" data-sample="chinese">Chinese Text</button>
+  </div>
+  <input id="sample" value="{{ samples.english }}" />
+  <div class="preview" id="preview-area">{{ samples.english }}</div>
+</div>
+
 <script>
-const input = document.getElementById('sample');
-const preview = document.getElementById('preview-area');
-input.addEventListener('input', (e)=> preview.textContent = e.target.value);
+(function() {
+  const input = document.getElementById('sample');
+  const preview = document.getElementById('preview-area');
+  const sampleBtns = document.querySelectorAll('.sample-btn');
+  
+  // Sample templates
+  const sampleTexts = {
+    english: '{{ samples.english }}',
+    chinese: '{{ samples.chinese }}'
+  };
+  
+  // Handle sample button clicks
+  sampleBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const sampleKey = e.target.dataset.sample;
+      input.value = sampleTexts[sampleKey];
+      preview.textContent = sampleTexts[sampleKey];
+      
+      // Update active button
+      sampleBtns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+    });
+  });
+  
+  // Handle live text input
+  input.addEventListener('input', (e) => {
+    preview.textContent = e.target.value;
+  });
+})();
 </script>
 </body>
 </html>

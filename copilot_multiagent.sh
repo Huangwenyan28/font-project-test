@@ -534,16 +534,91 @@ main() {
       init_config
       env_cmd=$(build_env)
       model_flag=""
-      local cm=$(read_json defaultModel)
+      local cm
+      cm=$(read_json defaultModel)
       [ "$cm" != "null" ] && [ -n "$cm" ] && model_flag="--model $cm"
-      shift
+      shift 2>/dev/null || true
       local prompt="$*"
-      if [ -z "$prompt" ]; then
-        echo "启动 Copilot（带模型/账号配置 + 额度监控）..."
-        handle_quota 0 eval "${env_cmd} copilot ${model_flag}" || true
-      else
-        handle_quota 0 eval "${env_cmd} copilot -p "$prompt" ${model_flag}" || true
+      
+      # 先做额度预检
+      echo "检查额度状态..."
+      local check_output
+      check_output=$(eval "${env_cmd} timeout 15 copilot -p 'say ok and nothing else' --silent 2>&1" || true)
+      if echo "$check_output" | grep -qiE "(exceeded.*(quota|limit)|rate limit|quota exhausted|insufficient_quota)"; then
+        echo ""
+        header "═══════════════════════════════════════════════"
+        warn "  Copilot 额度已用尽！"
+        header "═══════════════════════════════════════════════"
+        echo ""
+        echo "  请选择："
+        echo ""
+        echo "  [1] 充值后重试"
+        echo "      -> 进入 https://github.com/settings/billing 充值"
+        echo "      -> 充值后重新运行 ./copilot_multiagent.sh run"
+        echo ""
+        echo "  [2] 切换到另一个已保存的账号"
+        echo "      -> 如果你有其他有 Copilot 额度的 GitHub 号"
+        echo ""
+        echo "  [3] 用自己的 API Key"
+        echo "      -> 配置 BYOK 自定义提供商，不走 Copilot 额度"
+        echo ""
+        echo "  [4] 直接启动 copilot（跳过检测）"
+        echo ""
+        echo "  [q] 退出"
+        echo ""
+        while true; do
+          read -r -p "请输入 [1/2/3/4/q]: " choice
+          case "$choice" in
+            1) echo "充值链接: https://github.com/settings/billing"; exit 0 ;;
+            2)
+              local profiles=()
+              for pdir in "${PROFILES_DIR}"/*/; do
+                [ -d "$pdir" ] && profiles+=("$(basename "$pdir")")
+              done
+              if [ ${#profiles[@]} -eq 0 ]; then
+                warn "没有已保存的账号"
+                read -r -p "输入新账号名称: " new_name
+                [ -n "$new_name" ] && cmd_profile_add "$new_name"
+              else
+                echo "  已保存的账号:"
+                for i in "${!profiles[@]}"; do
+                  local marker=""
+                  [ "${profiles[$i]}" = "$(read_json currentProfile)" ] && marker=" <- 当前"
+                  echo "    [$((i+1))] ${profiles[$i]}$marker"
+                done
+                echo ""
+                read -r -p "选择账号编号 (1-${#profiles[@]}): " idx
+                if [[ "$idx" =~ ^[0-9]+$ ]] && [ "$idx" -ge 1 ] && [ "$idx" -le "${#profiles[@]}" ]; then
+                  cmd_profile_use "${profiles[$((idx-1))]}"
+                  info "已切换账号，重新检查额度..."
+                  exec "$0" run $prompt
+                fi
+              fi
+              ;;
+            3)
+              configure_provider_interactive
+              info "已配置 API Key，重新启动..."
+              exec "$0" run $prompt
+              ;;
+            4)
+              echo "直接启动 copilot..."
+              eval "${env_cmd} copilot ${model_flag}"
+              exit 0
+              ;;
+            q|Q) exit 0 ;;
+            *) echo "  无效选项" ;;
+          esac
+        done
       fi
+      
+      # 额度正常，启动 copilot
+      if [ -z "$prompt" ]; then
+        echo "启动 Copilot（带模型/账号配置）..."
+        eval "${env_cmd} copilot ${model_flag}"
+      else
+        eval "${env_cmd} copilot -p '$prompt' ${model_flag}"
+      fi
+      exit 0
       ;;
     help|--help|-h)
       header "\n用法:"
